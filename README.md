@@ -6,14 +6,13 @@
 ## 💻 硬體目標與優化重點
 
 ### 1. MacBook Pro 2015 (Intel Broadwell)
-* **顯示驅動:** 必須使用 `xf86-video-intel` 以確保 Xorg 穩定（避免 `modesetting` 導致 `no screens found` 黑畫面）。
+* **顯示驅動:** 必須使用 `xf86-video-intel` 以確保 Xorg 穩定
 * **散熱與電源:** 透過 `mbpfan` 接管 Apple SMC 風扇控制；使用 `tlp` 優化電池續航力。
-* **網路:** 經測試，使用現代化 `iwd` 搭配原生 `brcmfmac` 驅動最為穩定（若使用官方閉源 `broadcom-wl-dkms` 則必須改用 `NetworkManager`）。
+* **網路:** 經測試，使用現代化 `iwd` 搭配原生 `brcmfmac` 驅動最為穩定
 * **音量:** 整合 `PipeWire` (`wpctl`) 快捷鍵，具備自動解除靜音與 100% 音量限制。
 
 ### 2. m6s (N100 Mini PC)
 * **顯示:** 使用現代 `intel-media-driver` 提供 4K 硬體解碼。
-* **效能:** 專注於本地 AI 輔助與輕量化工作流。
 
 ---
 
@@ -35,7 +34,7 @@ makepkg -si
 cd .. && rm -rf yay
 
 # 產生 SSH 金鑰並加入 GitHub ([https://github.com/settings/keys](https://github.com/settings/keys))
-ssh-keygen -t ed25519 -C "your_email@example.com"
+ssh-keygen -t ed25519 -C "p331090144@hotmail.com"
 cat ~/.ssh/id_ed25519.pub
 
 # 取回基本設定檔
@@ -46,7 +45,7 @@ alias dot='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 echo ".dotfiles" >> ~/.gitignore
 
 # Clone 裸倉庫
-git clone --bare git@github.com:你的帳號/你的Repo名稱.git $HOME/.dotfiles
+git clone --bare git@github.com:aalizzwall/arch_i3wm.git $HOME/.dotfiles
 
 # 鋪設設定檔 (若提示 .bashrc 等檔案衝突，請先備份或刪除舊檔案再執行一次)
 # rm ~/.bashrc
