@@ -1,0 +1,58 @@
+#!/bin/bash
+# 四合一網路狀態監控 (SSID + IP + 上下行流量)
+
+STATE_FILE="/dev/shm/i3blocks_net_state"
+OUTPUT=""
+NEW_STATE=""
+
+# 掃描所有處於 UP 狀態且擁有 IPv4 的網卡 (排除 lo)
+for iface in $(ip -br link | awk '$2=="UP" && $1!="lo" {print $1}'); do
+    
+    # 1. 取得 IP
+    IP=$(ip -4 -br addr show "$iface" | awk '{print $3}' | cut -d/ -f1)
+    [ -z "$IP" ] && continue
+    
+    # 2. 取得當下累計流量 (bytes)
+    RX=$(cat "/sys/class/net/$iface/statistics/rx_bytes" 2>/dev/null)
+    TX=$(cat "/sys/class/net/$iface/statistics/tx_bytes" 2>/dev/null)
+    
+    OLD_RX=$RX
+    OLD_TX=$TX
+    
+    # 讀取上一秒的流量數據來相減
+    if [ -f "$STATE_FILE" ]; then
+        OLD_VALS=$(grep "^$iface " "$STATE_FILE")
+        if [ -n "$OLD_VALS" ]; then
+            OLD_RX=$(echo "$OLD_VALS" | awk '{print $2}')
+            OLD_TX=$(echo "$OLD_VALS" | awk '{print $3}')
+        fi
+    fi
+    
+    # 計算 KB/s
+    RX_KB=$(( (RX - OLD_RX) / 1024 ))
+    TX_KB=$(( (TX - OLD_TX) / 1024 ))
+    
+    # 格式化對齊 (讓數字跳動時狀態列不會一直抖)
+    RX_OUT=$(printf "%4s" "${RX_KB}K")
+    TX_OUT=$(printf "%4s" "${TX_KB}K")
+    
+    # 3. 根據網卡類型排版與上色 (Pango Markup)
+    if [[ "$iface" == w* ]]; then
+        # 無線網路：抓取 SSID
+        SSID=$(iw dev "$iface" link 2>/dev/null | grep -o 'SSID: .*' | cut -d' ' -f2-)
+        [ -z "$SSID" ] && SSID="Wi-Fi"
+        OUTPUT="$OUTPUT <span color='#00FFFF'> $SSID ($IP) ⬇$RX_OUT ⬆$TX_OUT</span>"
+    else
+        # 有線網路
+        OUTPUT="$OUTPUT <span color='#00FF00'>🌐 ETH ($IP) ⬇$RX_OUT ⬆$TX_OUT</span>"
+    fi
+    
+    # 紀錄新數據
+    NEW_STATE="$NEW_STATE\n$iface $RX $TX"
+done
+
+# 存回記憶體暫存檔
+echo -e "$NEW_STATE" | sed '/^$/d' > "$STATE_FILE"
+
+# 輸出給 i3blocks
+echo "$OUTPUT"
