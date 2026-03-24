@@ -247,8 +247,10 @@ for_window [title="cava-widget"] floating enable
 for_window [title="cava-widget"] border pixel 0
 
 # 2. 設定一個快捷鍵 (例如 Win + C) 來召喚這個浮動視窗
-bindsym $mod+c exec --no-startup-id terminator -T "cava-widget" -x cava
+#bindsym $mod+c exec --no-startup-id terminator -T "cava-widget" -x cava
 
+# 呼叫 Rofi 計算機 (即打即算，按 Enter 複製結果)
+bindsym $mod+c exec --no-startup-id rofi -show calc -modi calc -no-show-match -no-sort
 
 
 # Start i3bar to display a workspace bar (plus the system information i3status

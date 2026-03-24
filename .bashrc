@@ -2,13 +2,6 @@
 # ~/.bashrc
 #
 
-# If not running interactively, don't do anything
-#[[ $- != *i* ]] && return
-
-#alias ls='ls --color=auto'
-#alias grep='grep --color=auto'
-#PS1='[\u@\h \W]\$ '
-
 # --- 1. 智慧 Prompt (顯示 Git 分支) ---
 parse_git_branch() {
      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
@@ -30,4 +23,17 @@ export HISTSIZE=10000
 export HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
+# --- 備份常用環境參數 ---
 alias dot='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+
+# --- SSH Agent 自動化設定 ---
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    ssh-agent -s > "$HOME/.ssh/ssh-agent.env"
+fi
+
+if [[ ! "$SSH_AUTH_SOCK" ]]; then
+    eval "$(<"$HOME/.ssh/ssh-agent.env")" > /dev/null
+fi
+
+# 檢查是否已經加入鑰匙，若無則加入
+ssh-add -l > /dev/null || ssh-add ~/.ssh/id_ed25519 2> /dev/null
