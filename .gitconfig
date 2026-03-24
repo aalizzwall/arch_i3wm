@@ -14,17 +14,22 @@
 
 [alias]
     # 超強視覺化 Log：打 git lg 就能看到漂亮的支線圖
-    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
     
-    st = status
-    co = checkout
-    br = branch
-    cm = commit
+	st = status
+	co = checkout
+	br = branch
+    ci = commit
     ps = push
     pl = pull
+	cm = commit -m
 
 [pull]
     rebase = false
 
 [push]
     autoSetupRemote = true
+[diff]
+	tool = vimdiff
+[merge]
+	tool = vimdiff

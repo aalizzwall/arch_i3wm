@@ -36,16 +36,6 @@ export HISTSIZE=10000
 export HISTFILESIZE=${HISTSIZE}
 export HISTCONTROL=ignoreboth
 
-# [Java 與開發環境]
-# Arch Linux 現代做法：建議使用 `archlinux-java` 指令來切換預設 Java 版本
-# 預設路徑通常為 /usr/lib/jvm/default
-# 以下保留你的舊設定並註解，若有手動安裝 Oracle JDK 可解除註解
-# export JAVA_FONTS=/usr/share/fonts/TTF
-# export JRE_HOME=/home/pascal/workspace/software/oracle_jdk/jdk1.8.0_65/jre
-# export JAVA_HOME=/home/pascal/workspace/software/oracle_jdk/jdk1.8.0_65
-# export PATH=$JRE_HOME/../bin:$PATH
-# export M2_HOME=/opt/maven
-
 # ==============================================================================
 # 3. 智慧型 Prompt (整合 Git 狀態與時間差)
 # ==============================================================================
