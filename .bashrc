@@ -5,13 +5,6 @@
 # 如果不是互動式 Shell，則直接退出
 [[ $- != *i* ]] && return
 
-# ==============================================================================
-# 1. 系統環境與 Bash 選項 (Shopt)
-# ==============================================================================
-if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-fi
-
 # Bash 行為優化
 shopt -s cdspell         # 自動修正 cd 時的輕微拼字錯誤
 shopt -s checkwinsize    # 調整視窗大小後自動更新行數與欄數
@@ -23,10 +16,6 @@ shopt -s histappend      # 歷史紀錄用追加的，不要覆蓋
 shopt -s hostcomplete    # 嘗試補齊主機名稱
 
 set -o vi                # 啟用 Vi 編輯模式的命令列
-
-# X11 權限：允許本地端 Root 執行圖形介面程式
-xhost +local:root > /dev/null 2>&1
-complete -cf sudo
 
 # ==============================================================================
 # 2. 環境變數設定 (Exports)
@@ -69,19 +58,8 @@ alias ls='ls --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=au
 alias ll='ls -l --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
 alias la='ls -la --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
 
-# --- 系統維護與 Arch 專屬 ---
-alias np='nano PKGBUILD'
 # 升級版 fixit：解鎖 pacman 並使用 yay 一鍵更新所有系統與 AUR 套件
 alias fixit='sudo rm -f /var/lib/pacman/db.lck && yay -Syyuu'
-
-# --- Yay (AUR) 快捷鍵 ---
-alias y='yay'
-alias yu='yay -Syu'              # 一鍵更新
-alias yi='yay -S'                # 安裝
-alias yr='yay -Rns'              # 徹底移除
-alias yq='yay -Ss'               # 搜尋
-alias yc='yay -Yc'               # 清理無用依賴
-alias yclean='yay -Scc'          # 清除快取釋放空間
 
 # --- Git 裸倉庫同步 ---
 alias dot='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
@@ -136,3 +114,20 @@ exCN() {
 if [ -z "$DISPLAY" ] && [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ]; then
   exec startx
 fi
+
+# ==============================================================================
+# 鍵盤效率優化：讓 Bash 補全更像 Zsh
+# ==============================================================================
+
+# 1. 補全時不區分大小寫 (這對找檔案超級有用！)
+bind "set completion-ignore-case on"
+
+# 2. 如果有多個選項，按一下 Tab 就直接列出，不用按兩下
+bind "set show-all-if-ambiguous on"
+
+# 3. 補全時顯示檔案類型顏色 (跟 ls 一樣顏色)
+bind "set colored-stats on"
+
+# 4. 補全內容如果超過一頁，不要問 "Display all...?" 直接顯示
+bind "set completion-query-items 0"
+

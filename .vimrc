@@ -127,4 +127,25 @@ endfunction
 command! CleanSpace call RemoveTrailingWhitespace()
 
 " 智慧記憶游標位置：下次開啟檔案時，回到上次編輯的地方
-au BufReadPost * if line("'\"") > 0|if line("'\"")
+au BufReadPost * if line("'\"") > 0|if line("'\"") <= line("$")|exe("norm '\"")|else|exe "norm $"|endif|endif
+
+" 針對特定副檔名的設定
+au BufNewFile,BufRead *.ds :set syn=scheme
+
+" --- 7. GUI 專屬設定 (gVim) ---
+if has("gui_running")
+    color elflord
+    set guifont=Source\ code\ pro\ 12
+    set go-=L           " 隱藏左邊滾動條
+    set go-=m           " 隱藏選單
+    set go-=T           " 隱藏工具列
+    set go+=b           " 顯示底部滾動條
+    set mouse=a
+    set novb
+    set lines=31
+    set columns=121
+    hi Visual ctermfg=brown ctermbg=gray gui=bold guifg=gray guibg=brown
+else
+    color slate
+    set mouse=          " 終端機下預設關閉滑鼠，方便純鍵盤選取與中鍵貼上
+endif
