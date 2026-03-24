@@ -1,0 +1,21 @@
+# 忽略 Git 裸倉庫資料夾本身
+.dotfiles/
+
+# 忽略 Mac 系統產生的垃圾檔
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# 忽略 Vim 產生的暫存與 Undo 檔 (既然我們開啟了 undofile)
+*.swp
+*.swo
+*.un~
+.netrwhist
+
+# 忽略 Python 快取 (如果你有跑一些 AI 或自動化腳本)
+__pycache__/
+*.py[cod]
+
+# 忽略一些暫時性的 log
+*.log
