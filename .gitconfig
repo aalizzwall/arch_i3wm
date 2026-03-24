@@ -1,0 +1,30 @@
+[user]
+    name = Pascal Wang
+    email = p331090144@hotmail.com
+
+[core]
+    editor = vim
+    autocrlf = input
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+
+[alias]
+    # 超強視覺化 Log：打 git lg 就能看到漂亮的支線圖
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    
+    st = status
+    co = checkout
+    br = branch
+    cm = commit
+    ps = push
+    pl = pull
+
+[pull]
+    rebase = false
+
+[push]
+    autoSetupRemote = true
