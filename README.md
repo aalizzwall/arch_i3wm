@@ -54,3 +54,5 @@ dot checkout
 # 隱藏未追蹤檔案，保持 Git Status 清潔
 dot config --local status.showUntrackedFiles no
 
+官方社群神級腳本 (i3blocks-contrib)
+git clone https://github.com/vivien/i3blocks-contrib.git ~/.config/i3blocks/contrib

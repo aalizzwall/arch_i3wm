@@ -43,12 +43,14 @@ noto-fonts-emoji
 openssh
 otf-font-awesome
 pavucontrol
+pidgin
 pipewire-alsa
 pipewire-pulse
 playerctl
 podman
 ranger
 rofi
+rofi-bluetooth-git
 rofi-calc
 scrot
 sof-firmware

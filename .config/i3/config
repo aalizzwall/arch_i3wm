@@ -191,5 +191,6 @@ bindsym $mod+r mode "resize"
 # --- 11. 狀態列 (Status Bar) ---
 bar {
   status_command i3blocks
+  # 關鍵在這裡！必須要有 pango: 並且指定一個 Nerd Font
   tray_output primary
 }

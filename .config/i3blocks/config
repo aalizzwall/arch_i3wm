@@ -14,16 +14,21 @@ command=~/.config/i3blocks/scripts/net_all_in_one
 interval=1
 markup=pango
 
+[bluetooth]
+command=~/.config/i3blocks/scripts/bluetooth.sh
+interval=5
+markup=pango
+
 # 3. CPU 使用率 - 看看 Brave 瀏覽器有沒有在大吃資源
 [cpu_usage]
-command=~/.config/i3blocks/cpu_usage/cpu_usage
+command=~/.config/i3blocks/contrib/cpu_usage/cpu_usage
 interval=10
 label=󰻠 CPU 
 #min_width=CPU 100.00%
 
 # 4. CPU 溫度 - 迷你主機最怕發燒，超過 70 度它會變紅
 [temperature]
-command=~/.config/i3blocks/temperature/temperature
+command=~/.config/i3blocks/contrib/temperature/temperature
 label= 
 interval=10
 T_WARN=70
@@ -31,13 +36,13 @@ T_CRIT=85
 
 # 5. 記憶體剩餘 - 你的 12GB 夠不夠用看這裡
 [memory]
-command=~/.config/i3blocks/memory/memory
+command=~/.config/i3blocks/contrib/memory/memory
 label=󰍛 RAM 
 interval=30
 
 # 6. 硬體空間 - 隨時監控你的 SSD 還有多少容量
 [disk]
-command=~/.config/i3blocks/disk/disk
+command=~/.config/i3blocks/contrib/disk/disk
 label=󰋊 
 interval=30
 instance=/
