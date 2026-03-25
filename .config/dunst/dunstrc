@@ -1,0 +1,53 @@
+[global]
+    # 顯示位置與大小 (出現在右上角，距離邊緣 20px)
+    origin = top-right
+    offset = 20x20
+    width = 300
+    height = 200
+
+    # 外觀設定 (無邊框、極簡設計)
+    transparency = 15
+    frame_width = 0
+    corner_radius = 8
+    
+    # 字體設定 (使用你系統完美的 Nerd Font)
+    font = JetBrainsMono Nerd Font 11
+
+    # 文字排版 (支援 HTML 粗體與換行)
+    format = "<b>%s</b>\n%b"
+    alignment = left
+    vertical_alignment = center
+    word_wrap = yes
+
+    # 間距與邊距
+    padding = 15
+    horizontal_padding = 15
+
+    # 行為設定
+    timeout = 5
+    ignore_newline = no
+    show_indicators = yes
+
+# ==========================================
+# 根據不同「緊急程度」套用不同顏色
+# ==========================================
+
+[urgency_low]
+    # 低級別通知 (例如音樂切換)：低調的暗灰色
+    background = "#282c34"
+    foreground = "#abb2bf"
+    timeout = 3
+
+[urgency_normal]
+    # 一般通知 (例如 LINE 訊息)：優雅的深海藍色調
+    background = "#2E3440"
+    foreground = "#D8DEE9"
+    timeout = 6
+
+[urgency_critical]
+    # 嚴重警告 (例如電池快沒電)：醒目的柔和紅色，且不會自動消失
+    background = "#BF616A"
+    foreground = "#ECEFF4"
+    frame_width = 2
+    frame_color = "#ECEFF4"
+    timeout = 0
