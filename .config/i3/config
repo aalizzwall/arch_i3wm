@@ -44,6 +44,27 @@ bindsym XF86AudioMute exec --no-startup-id wpctl set-mute @DEFAULT_AUDIO_SINK@ t
 # 螢幕亮度控制 (全面改用 brightnessctl，解決 xbacklight 跨硬體失效問題)
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
+# ==============================================================================
+# MacBook 鍵盤背光控制 (F5 變暗 / F6 變亮)
+# 注意：如果你的設備名稱不是 smc::kbd_backlight，請把下面的代號換掉
+# ==============================================================================
+bindsym XF86KbdBrightnessUp exec --no-startup-id brightnessctl --device='smc::kbd_backlight' set +10%
+bindsym XF86KbdBrightnessDown exec --no-startup-id brightnessctl --device='smc::kbd_backlight' set 10%-
+# ==============================================================================
+# MacBook F3 / F4 按鍵賦能
+# ==============================================================================
+# F3 繼承 Mission Control 靈魂：攤開所有運作中的視窗讓你搜尋切換
+bindsym XF86LaunchA exec --no-startup-id rofi -show window
+
+# F4 繼承 Launchpad 靈魂：呼叫應用程式啟動器
+bindsym XF86LaunchB exec --no-startup-id rofi -show drun
+# ==============================================================================
+# MacBook 多媒體控制鍵 (F7: 上一首, F8: 播放/暫停, F9: 下一首)
+# 依賴套件: playerctl
+# ==============================================================================
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl next
 
 # 螢幕截圖 (全螢幕與區域框選)
 bindsym Print exec --no-startup-id scrot 'screenshot_%Y-%m-%d-%H%M%S.png' -e 'mv $f ~/Pictures/'
