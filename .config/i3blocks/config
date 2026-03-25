@@ -16,14 +16,14 @@ markup=pango
 
 # 3. CPU 使用率 - 看看 Brave 瀏覽器有沒有在大吃資源
 [cpu_usage]
-command=~/.config/i3blocks/contrib/cpu_usage/cpu_usage
+command=~/.config/i3blocks/cpu_usage/cpu_usage
 interval=10
 label=󰻠 CPU 
 #min_width=CPU 100.00%
 
 # 4. CPU 溫度 - 迷你主機最怕發燒，超過 70 度它會變紅
 [temperature]
-command=~/.config/i3blocks/contrib/temperature/temperature
+command=~/.config/i3blocks/temperature/temperature
 label= 
 interval=10
 T_WARN=70
@@ -31,13 +31,13 @@ T_CRIT=85
 
 # 5. 記憶體剩餘 - 你的 12GB 夠不夠用看這裡
 [memory]
-command=~/.config/i3blocks/contrib/memory/memory
+command=~/.config/i3blocks/memory/memory
 label=󰍛 RAM 
 interval=30
 
 # 6. 硬體空間 - 隨時監控你的 SSD 還有多少容量
 [disk]
-command=~/.config/i3blocks/contrib/disk/disk
+command=~/.config/i3blocks/disk/disk
 label=󰋊 
 interval=30
 instance=/
@@ -54,6 +54,11 @@ label=VOL
 interval=once
 signal=10
 color=#f3f4f5
+
+[battery]
+# 讀取底層硬體狀態：沒有電池就隱藏，有電池就判斷充放電狀態並加上圖示
+command=[ -d /sys/class/power_supply/BAT0 ] && { [ "$(cat /sys/class/power_supply/BAT0/status)" = "Discharging" ] && echo "🔋 $(cat /sys/class/power_supply/BAT0/capacity)%" || echo "🔌 $(cat /sys/class/power_supply/BAT0/capacity)%"; }
+interval=5
 
 # 8. 時間與日期
 [time]
