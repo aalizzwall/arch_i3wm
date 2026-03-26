@@ -4,7 +4,6 @@
 
 # --- 1. 基本設定與變數 (Base Settings) ---
 set $mod Mod4
-set $Locker "xset dpms force off && i3lock -n -c 000000"
 
 # 字體設定 (影響視窗標題與 Bar)
 font pango:Noto Mono CJK TC 8
@@ -26,7 +25,8 @@ smart_borders on
 
 # --- 3. 開機自動啟動 (Autostart) ---
 # ⚠️ 注意：中文輸入法 (fcitx5) 已在 ~/.xinitrc 中宣告啟動，此處不需重複啟動以免衝突
-exec --no-startup-id xss-lock -- i3lock -n -c 000000 
+#exec --no-startup-id xset dpms 600 600 600
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 000000
 exec --no-startup-id blueman-applet
 exec --no-startup-id feh --bg-scale /usr/local/share/wallpaper/GOD.JPG
 
@@ -151,7 +151,7 @@ bindsym $mod+Shift+b exec "~/.local/bin/dotfiles_catcher.sh"
 # [系統電源模式]
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
-  bindsym l exec --no-startup-id $Locker, mode "default"
+  bindsym l exec --no-startup-id "i3lock -c 000000 && sleep 1 && xset dpms force off", mode "default"
   bindsym e exec --no-startup-id i3-msg exit, mode "default"
   bindsym s exec --no-startup-id systemctl suspend, mode "default"
   bindsym h exec --no-startup-id systemctl hybrid-sleep, mode "default"
