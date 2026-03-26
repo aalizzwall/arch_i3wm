@@ -1,0 +1,16 @@
+#!/bin/bash
+# 自動偵測所有處於 UP 狀態且有 IPv4 的網卡 (排除本地端 lo)
+
+ip -4 -br addr show up | grep -v "^lo" | awk '{
+    # 根據網卡名稱開頭判斷類型
+    if ($1 ~ /^e/) icon="ETH"
+    else if ($1 ~ /^w/) icon="WIFI"
+    else icon=$1
+    
+    # 切割字串，移除 /24 這種子網路遮罩後綴
+    split($3, ip, "/")
+    
+    # 格式化輸出
+    printf "%s: %s   ", icon, ip[1]
+}' | sed 's/ *$//'
+echo "" # 確保有換行符號給 i3blocks
