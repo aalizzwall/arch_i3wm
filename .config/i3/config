@@ -34,6 +34,11 @@ exec --no-startup-id feh --bg-scale /usr/local/share/wallpaper/GOD.JPG
 exec --no-startup-id dunst
 exec --no-startup-id picom -b
 
+# 3. 硬體電量守護神 (自製腳本)
+# 負責 MBP 的低電量/過充「鍵盤奪命連環閃」。
+# (因為腳本內已寫入防呆機制，在你的 m6s 桌機上啟動時會直接安靜退出，不會報錯)
+exec --no-startup-id ~/.config/i3blocks/scripts/battery_monitor.sh
+
 
 # --- 4. 系統與硬體控制快捷鍵 (Hardware Controls) ---
 # 音量控制 (使用 PipeWire/wpctl 並即時通知 i3blocks 更新狀態)
