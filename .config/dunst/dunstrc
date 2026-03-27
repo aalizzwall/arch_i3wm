@@ -1,7 +1,7 @@
 [global]
     # 顯示位置與大小 (出現在右上角，距離邊緣 20px)
-    origin = top-right
-    offset = 20x20
+    origin = bottom-right
+    offset = 20x40
     width = 300
     height = 200
 
