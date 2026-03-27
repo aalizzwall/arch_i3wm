@@ -61,8 +61,8 @@ signal=10
 color=#f3f4f5
 
 [battery]
-# 讀取底層硬體狀態：沒有電池就隱藏，有電池就判斷充放電狀態並加上圖示
-command=[ -d /sys/class/power_supply/BAT0 ] && { [ "$(cat /sys/class/power_supply/BAT0/status)" = "Discharging" ] && echo "🔋 $(cat /sys/class/power_supply/BAT0/capacity)%" || echo "🔌 $(cat /sys/class/power_supply/BAT0/capacity)%"; }
+# 點擊左鍵 (BLOCK_BUTTON=1) 時彈出系統通知顯示可用時間，平時維持原樣
+command=[ -d /sys/class/power_supply/BAT0 ] && { [ "$BLOCK_BUTTON" = "1" ] && notify-send "🔋 電池預估時間" "$(acpi -b)"; [ "$(cat /sys/class/power_supply/BAT0/status)" = "Discharging" ] && echo "🔋 $(cat /sys/class/power_supply/BAT0/capacity)%" || echo "🔌 $(cat /sys/class/power_supply/BAT0/capacity)%"; }
 interval=5
 
 # 8. 時間與日期
