@@ -1,5 +1,7 @@
 7zip
+acpi
 acpica
+adobe-source-code-pro-fonts
 adobe-source-han-sans-tw-fonts
 adobe-source-han-serif-tw-fonts
 alsa-utils
@@ -11,11 +13,14 @@ bluez
 bluez-utils
 brave-bin
 brightnessctl
+btop
 cmake
+code
 cronie
 dialog
 discord
 dosfstools
+dunst
 dust
 efibootmgr
 ethtool
@@ -27,6 +32,7 @@ fcitx5-chewing
 fcitx5-chinese-addons
 fcitx5-configtool
 fcitx5-gtk
+fuse3
 git
 grub
 hwinfo
@@ -38,6 +44,7 @@ intel-gpu-tools
 intel-ucode
 iwd
 jdk-openjdk
+less
 libva-intel-driver
 libva-utils
 linux-firmware
@@ -59,12 +66,15 @@ pipewire
 pipewire-alsa
 pipewire-audio
 pipewire-pulse
+playerctl
 podman
 powertop
 python-pip
+qt6-svg
 ranger
 reflector
 rofi
+rofi-bluetooth-git
 rofi-calc
 rpi-imager
 scrot
@@ -81,7 +91,6 @@ wayland-protocols
 wget
 wireless-regdb
 wireplumber
-xbindkeys
 xdg-user-dirs
 xdg-utils
 xiccd
