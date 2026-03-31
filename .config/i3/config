@@ -26,7 +26,8 @@ smart_borders on
 # --- 3. 開機自動啟動 (Autostart) ---
 # ⚠️ 注意：中文輸入法 (fcitx5) 已在 ~/.xinitrc 中宣告啟動，此處不需重複啟動以免衝突
 #exec --no-startup-id xset dpms 600 600 600
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 000000
+#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock -n -c 000000
+exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/i3blocks/scripts/lock.sh
 exec --no-startup-id blueman-applet
 exec --no-startup-id feh --bg-scale /usr/local/share/wallpaper/GOD.JPG
 
