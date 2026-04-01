@@ -15,7 +15,7 @@ case $BLOCK_BUTTON in
     1) 
         # 左鍵：打開終端機並使用 journalctl 查看該服務的即時日誌
         # 注意：請把 alacritty 換成你使用的終端機 (例如 kitty, gnome-terminal 等)
-        i3-sensible-terminal -e journalctl --user -u "$SERVICE" -f & 
+        i3-sensible-terminal -e "journalctl --user -u $SERVICE -f" & 
         ;;
     3) 
         # 右鍵：重新啟動該服務
