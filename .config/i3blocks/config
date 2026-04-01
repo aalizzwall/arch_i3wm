@@ -3,11 +3,6 @@ separator_block_width=15
 markup=none
 
 
-[system_load]
-# 使用 awk 讀取 /proc/loadavg (系統負載)，並自動判斷要顯示哪種交通工具/動物
-command=cat /proc/loadavg | awk '{load=$1; if(load<1.0) icon="🚀"; else if(load<2.0) icon="✈️ "; else if(load<3.0) icon="🐇"; else icon="🐢"; print icon " " load}'
-interval=2
-color=#FFD700
 
 [net_all_in_one]
 command=~/.config/i3blocks/scripts/net_all_in_one
@@ -18,6 +13,22 @@ markup=pango
 command=~/.config/i3blocks/scripts/bluetooth.sh
 interval=5
 markup=pango
+
+[crypto_bot-service]
+# 指向你剛剛建立的腳本
+command=~/.config/i3blocks/scripts/systemd_user_status.sh
+# 填入你 podman 服務的確切名稱 (例如 container-my-app.service)
+instance=crypto_bot.service
+# 每 10 秒檢查一次狀態
+interval=10
+# 讓游標移過去時顯示為手指圖示 (代表可點擊)
+cursor=pointer
+
+[system_load]
+# 使用 awk 讀取 /proc/loadavg (系統負載)，並自動判斷要顯示哪種交通工具/動物
+command=cat /proc/loadavg | awk '{load=$1; if(load<1.0) icon="🚀"; else if(load<2.0) icon="✈️ "; else if(load<3.0) icon="🐇"; else icon="🐢"; print icon " " load}'
+interval=2
+color=#FFD700
 
 # 3. CPU 使用率 - 看看 Brave 瀏覽器有沒有在大吃資源
 [cpu_usage]
