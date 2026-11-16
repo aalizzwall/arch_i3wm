@@ -1,8 +1,9 @@
 {
     "window.autoDetectColorScheme": true,
-    "workbench.preferredLightColorTheme": "VS Code Dark",
+    "workbench.preferredLightColorTheme": "Dark 2026",
     "http.systemCertificatesNode": true,
     "geminicodeassist.project": "rosy-dispatch-0z2vf",
     "terminal.integrated.copyOnSelection": true,
-    "terminal.integrated.rightClickBehavior": "paste"
+    "terminal.integrated.rightClickBehavior": "paste",
+    "geminicodeassist.inlineSuggestions.enableAuto": true
 }

@@ -55,6 +55,8 @@ export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 export SDL_IM_MODULE=fcitx
 
+dbus-update-activation-environment --systemd --all
+
 fcitx5 -d &
 
 exec i3

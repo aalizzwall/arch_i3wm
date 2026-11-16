@@ -131,3 +131,6 @@ bind "set colored-stats on"
 # 4. 補全內容如果超過一頁，不要問 "Display all...?" 直接顯示
 bind "set completion-query-items 0"
 
+
+# uv
+export PATH="/home/pascal/.local/bin:$PATH"

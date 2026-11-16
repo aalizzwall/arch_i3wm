@@ -1,6 +1,6 @@
 [user]
-    name = Pascal Wang
-    email = p331090144@hotmail.com
+	name = Pascal Wang
+	email = pascal@alizzwall.com
 
 [core]
     editor = vim
@@ -33,3 +33,9 @@
 	tool = vimdiff
 [merge]
 	tool = vimdiff
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
