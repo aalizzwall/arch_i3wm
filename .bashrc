@@ -132,5 +132,4 @@ bind "set colored-stats on"
 bind "set completion-query-items 0"
 
 
-# uv
 export PATH="/home/pascal/.local/bin:$PATH"
