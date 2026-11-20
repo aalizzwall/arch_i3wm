@@ -1,58 +1,122 @@
-#!/bin/bash
-# 四合一網路狀態監控 (SSID + IP + 上下行流量)
+#!/usr/bin/env bash
+# 精簡高效能網路狀態監控 (SSID + 訊號 dBm + 自動進位網速；IP/網關/BBR 收進左鍵通知)
 
-STATE_FILE="/dev/shm/i3blocks_net_state"
-OUTPUT=""
-NEW_STATE=""
+STATE_FILE="/dev/shm/i3blocks_net_state_${UID}"
+read -r up_sec _ < /proc/uptime
+now_cs="${up_sec/./}"
+now_cs=$(( 10#$now_cs ))
 
-# 掃描所有處於 UP 狀態且擁有 IPv4 的網卡 (排除 lo)
-for iface in $(ip -br link | awk '$2=="UP" && $1!="lo" {print $1}'); do
-    
-    # 1. 取得 IP
-    IP=$(ip -4 -br addr show "$iface" | awk '{print $3}' | cut -d/ -f1)
-    [ -z "$IP" ] && continue
-    
-    # 2. 取得當下累計流量 (bytes)
-    RX=$(cat "/sys/class/net/$iface/statistics/rx_bytes" 2>/dev/null)
-    TX=$(cat "/sys/class/net/$iface/statistics/tx_bytes" 2>/dev/null)
-    
-    OLD_RX=$RX
-    OLD_TX=$TX
-    
-    # 讀取上一秒的流量數據來相減
-    if [ -f "$STATE_FILE" ]; then
-        OLD_VALS=$(grep "^$iface " "$STATE_FILE")
-        if [ -n "$OLD_VALS" ]; then
-            OLD_RX=$(echo "$OLD_VALS" | awk '{print $2}')
-            OLD_TX=$(echo "$OLD_VALS" | awk '{print $3}')
-        fi
-    fi
-    
-    # 計算 KB/s
-    RX_KB=$(( (RX - OLD_RX) / 1024 ))
-    TX_KB=$(( (TX - OLD_TX) / 1024 ))
-    
-    # 格式化對齊 (讓數字跳動時狀態列不會一直抖)
-    RX_OUT=$(printf "%4s" "${RX_KB}K")
-    TX_OUT=$(printf "%4s" "${TX_KB}K")
-    
-    # 3. 根據網卡類型排版與上色 (Pango Markup)
-    if [[ "$iface" == w* ]]; then
-        # 無線網路：抓取 SSID
-        SSID=$(iw dev "$iface" link 2>/dev/null | grep -o 'SSID: .*' | cut -d' ' -f2-)
-        [ -z "$SSID" ] && SSID="Wi-Fi"
-        OUTPUT="$OUTPUT <span color='#00FFFF'> $SSID ($IP) ⬇$RX_OUT ⬆$TX_OUT</span>"
+# 讀取舊狀態（格式: iface prev_cs prev_rx prev_tx）
+declare -A prev_cs_map prev_rx_map prev_tx_map
+if [[ -r "$STATE_FILE" ]]; then
+    while read -r f_if f_cs f_rx f_tx; do
+        [[ -n "$f_if" ]] || continue
+        prev_cs_map["$f_if"]="$f_cs"
+        prev_rx_map["$f_if"]="$f_rx"
+        prev_tx_map["$f_if"]="$f_tx"
+    done < "$STATE_FILE"
+fi
+
+fmt_rate() {
+    awk -v bps="$1" 'BEGIN {
+        if (bps >= 1048576)     printf "%5.1fM", bps / 1048576;
+        else if (bps >= 1024)   printf "%5.0fK", bps / 1024;
+        else                    printf "%5.0fK", 0;
+    }'
+}
+
+output=""
+new_state=""
+popup_lines=""
+primary_ip=""
+
+while read -r iface ip_cidr; do
+    [[ -n "$iface" && -n "$ip_cidr" ]] || continue
+    # 過濾 loopback 與容器/虛擬橋接網卡
+    case "$iface" in
+        lo|docker*|podman*|cni-*|veth*|br-*|virbr*) continue ;;
+    esac
+
+    ip="${ip_cidr%%/*}"
+    [[ -z "$primary_ip" ]] && primary_ip="$ip"
+
+    rx="$(cat "/sys/class/net/${iface}/statistics/rx_bytes" 2>/dev/null || echo 0)"
+    tx="$(cat "/sys/class/net/${iface}/statistics/tx_bytes" 2>/dev/null || echo 0)"
+
+    dt_cs=$(( now_cs - ${prev_cs_map[$iface]:-$now_cs} ))
+    if (( dt_cs > 0 )); then
+        drx=$(( rx - ${prev_rx_map[$iface]:-$rx} ))
+        dtx=$(( tx - ${prev_tx_map[$iface]:-$tx} ))
+        (( drx < 0 )) && drx=0
+        (( dtx < 0 )) && dtx=0
+        rx_bps=$(( drx * 100 / dt_cs ))
+        tx_bps=$(( dtx * 100 / dt_cs ))
     else
-        # 有線網路
-        OUTPUT="$OUTPUT <span color='#00FF00'>🌐 ETH ($IP) ⬇$RX_OUT ⬆$TX_OUT</span>"
+        rx_bps=0
+        tx_bps=0
     fi
-    
-    # 紀錄新數據
-    NEW_STATE="$NEW_STATE\n$iface $RX $TX"
-done
 
-# 存回記憶體暫存檔
-echo -e "$NEW_STATE" | sed '/^$/d' > "$STATE_FILE"
+    rx_out="$(fmt_rate "$rx_bps")"
+    tx_out="$(fmt_rate "$tx_bps")"
+    new_state+="${iface} ${now_cs} ${rx} ${tx}"$'\n'
 
-# 輸出給 i3blocks
-echo "$OUTPUT"
+    if [[ "$iface" == w* ]]; then
+        iw_out="$(iw dev "$iface" link 2>/dev/null || true)"
+        ssid="$(awk '/SSID:/ {sub(/^[ \t]*SSID: /, ""); print; exit}' <<< "$iw_out")"
+        sig="$(awk '/signal:/ {print $2; exit}' <<< "$iw_out")"
+        freq="$(awk '/freq:/ {print int($2); exit}' <<< "$iw_out")"
+        txrate="$(awk '/tx bitrate:/ {print $3 " " $4; exit}' <<< "$iw_out")"
+        [[ -z "$ssid" ]] && ssid="Wi-Fi"
+
+        # Escape Pango 特殊字元，避免 SSID 含 & / < 破壞 markup
+        ssid_esc="${ssid//&/&amp;}"
+        ssid_esc="${ssid_esc//</&lt;}"
+        ssid_esc="${ssid_esc//>/&gt;}"
+
+        color="#00FFFF"
+        if [[ -n "$sig" ]]; then
+            if (( sig <= -80 )); then
+                color="#bf616a"
+            elif (( sig <= -70 )); then
+                color="#ebcb8b"
+            fi
+        fi
+
+        band=""
+        if [[ -n "$freq" ]]; then
+            (( freq >= 4900 )) && band="5GHz" || band="2.4GHz"
+        fi
+
+        sig_txt="${sig:+ ${sig}dBm}"
+        output+="<span color='${color}'> ${ssid_esc}${sig_txt} ⬇${rx_out} ⬆${tx_out}</span> "
+        popup_lines+="Wi-Fi (${iface}): ${ssid} ${band:+(${band})}"$'\n'
+        popup_lines+="  IP     : ${ip}"$'\n'
+        popup_lines+="  Signal : ${sig:-N/A} dBm  |  Link: ${txrate:-N/A}"$'\n'
+    else
+        output+="<span color='#a3be8c'>󰈀 ${iface} ⬇${rx_out} ⬆${tx_out}</span> "
+        popup_lines+="Wired (${iface}): ${ip}"$'\n'
+    fi
+done < <(ip -4 -o addr show scope global 2>/dev/null | awk '!seen[$2]++ {print $2, $4}')
+
+printf '%s' "$new_state" > "$STATE_FILE"
+
+if [[ "${BLOCK_BUTTON:-}" == "1" ]]; then
+    gw="$(ip route show default 2>/dev/null | awk '/default/ {print $3 " via " $5; exit}')"
+    tcp_cc="$(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null || echo N/A)"
+    notify-send "🌐 網路詳細遙測" "${popup_lines:-目前無連線}Gateway: ${gw:-N/A}
+TCP CC : ${tcp_cc}"
+elif [[ "${BLOCK_BUTTON:-}" == "3" && -n "$primary_ip" ]]; then
+    if command -v xclip >/dev/null 2>&1; then
+        printf '%s' "$primary_ip" | xclip -selection clipboard
+        notify-send "📋 已複製本機 IP" "$primary_ip"
+    elif command -v xsel >/dev/null 2>&1; then
+        printf '%s' "$primary_ip" | xsel --clipboard --input
+        notify-send "📋 已複製本機 IP" "$primary_ip"
+    fi
+fi
+
+if [[ -z "$output" ]]; then
+    echo "<span color='#bf616a'>󰖪 Offline</span>"
+else
+    printf '%s\n' "${output% }"
+fi

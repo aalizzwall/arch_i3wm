@@ -2,12 +2,11 @@
 separator_block_width=15
 markup=none
 
-
-
 [net_all_in_one]
 command=~/.config/i3blocks/scripts/net_all_in_one
-interval=1
+interval=2
 markup=pango
+cursor=pointer
 
 [bluetooth]
 command=~/.config/i3blocks/scripts/bluetooth.sh
@@ -24,32 +23,35 @@ interval=10
 # 讓游標移過去時顯示為手指圖示 (代表可點擊)
 cursor=pointer
 
+# 1. PSI + Load Average 卡頓雷達（點擊看 PSI 與 Top CPU）
 [system_load]
-# 使用 awk 讀取 /proc/loadavg (系統負載)，並自動判斷要顯示哪種交通工具/動物
-command=cat /proc/loadavg | awk '{load=$1; if(load<1.0) icon="🚀"; else if(load<2.0) icon="✈️ "; else if(load<3.0) icon="🐇"; else icon="🐢"; print icon " " load}'
+command=~/.config/i3blocks/scripts/psi_load.sh
 interval=2
-color=#FFD700
+cursor=pointer
 
-# 3. CPU 使用率 - 看看 Brave 瀏覽器有沒有在大吃資源
+# 2. CPU 使用率 + 即時頻率（零依賴純 /proc/stat，點擊看 Governor/ASPM/Undervolt）
 [cpu_usage]
-command=~/.config/i3blocks/contrib/cpu_usage/cpu_usage
-interval=10
-label=󰻠 CPU 
-#min_width=CPU 100.00%
+command=~/.config/i3blocks/scripts/cpu_freq.sh
+interval=3
+cursor=pointer
 
-# 4. CPU 溫度 - 迷你主機最怕發燒，超過 70 度它會變紅
+# 3. 真實 CPU 封裝溫度 + Intel GPU 頻率 + Apple 風扇轉速（跨機自動偵測）
 [temperature]
-command=~/.config/i3blocks/contrib/temperature/temperature
-label= 
-interval=10
-T_WARN=70
-T_CRIT=85
+command=~/.config/i3blocks/scripts/temp_fan.sh
+interval=3
+cursor=pointer
 
-# 5. 記憶體剩餘 - 你的 12GB 夠不夠用看這裡
+# 4. 真實可用記憶體 (MemAvailable，點擊看 Dirty/Shmem 與 Top 5 RAM)
 [memory]
-command=~/.config/i3blocks/contrib/memory/memory
-label=󰍛 RAM 
-interval=30
+command=~/.config/i3blocks/scripts/memory_geek.sh
+interval=5
+cursor=pointer
+
+# 5. zram 壓縮 + Brave RAM OverlayFS（條件顯示，平常極精簡）
+[zram_psd]
+command=~/.config/i3blocks/scripts/zram_psd.sh
+interval=10
+cursor=pointer
 
 # 6. 硬體空間 - 隨時監控你的 SSD 還有多少容量
 [disk]
@@ -58,12 +60,7 @@ label=󰋊
 interval=30
 instance=/
 
-# 7. 音量顯示 - 既然鍵盤能調音量了，畫面上也要看得到
-#[volume]
-#command=~/.config/i3blocks/contrib/volume/volume
-#label= 
-#interval=once
-#signal=10
+# 7. 音量顯示
 [volume]
 command=wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2*100) "%" ($3=="[MUTED]" ? " 󰝟" : " ")}'
 label=VOL 
@@ -71,12 +68,13 @@ interval=once
 signal=10
 color=#f3f4f5
 
+# 8. 電池電量 + 即時放電/充電瓦數（點擊顯示預估時間、健康度、循環次數）
 [battery]
-# 點擊左鍵 (BLOCK_BUTTON=1) 時彈出系統通知顯示可用時間，平時維持原樣
-command=[ -d /sys/class/power_supply/BAT0 ] && { [ "$BLOCK_BUTTON" = "1" ] && notify-send "🔋 電池預估時間" "$(acpi -b)"; [ "$(cat /sys/class/power_supply/BAT0/status)" = "Discharging" ] && echo "🔋 $(cat /sys/class/power_supply/BAT0/capacity)%" || echo "🔌 $(cat /sys/class/power_supply/BAT0/capacity)%"; }
+command=~/.config/i3blocks/scripts/battery_watt.sh
 interval=5
+cursor=pointer
 
-# 8. 時間與日期
+# 9. 時間與日期
 [time]
 command=date '+%Y-%m-%d %H:%M:%S'
 interval=1
