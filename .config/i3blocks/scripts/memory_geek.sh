@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# 真實可用記憶體監控 (MemAvailable) + 左鍵顯示 Dirty/Shmem 與 Top 5 吃 RAM 行程
+# 精簡記憶體監控 (MemAvailable；常駐只顯示已用 GB，左鍵看詳細與 Top 5 RAM)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/theme.sh
+source "${SCRIPT_DIR}/lib/theme.sh"
 
 read -r total_kb avail_kb shmem_kb dirty_kb swap_t_kb swap_f_kb < <(
     awk '
@@ -29,18 +33,15 @@ Top RAM (RSS):
 ${top_mem}"
 fi
 
-full="$(awk -v u="$used_kb" -v t="$total_kb" -v p="$pct" 'BEGIN {
-    printf "󰍛 %.1fG/%.1fG (%d%%)", u/1048576, t/1048576, p
-}')"
-
-echo "$full"
-echo "󰍛 ${pct}%"
+val_c="$C_FG"
+icon_c="$C_ICON"
 if (( pct >= 92 )); then
-    echo "#bf616a"
+    val_c="$C_CRIT"; icon_c="$C_CRIT"
 elif (( pct >= 85 )); then
-    echo "#d08770"
+    val_c="$C_HIGH"; icon_c="$C_HIGH"
 elif (( pct >= 75 )); then
-    echo "#ebcb8b"
-else
-    echo "#d8dee9"
+    val_c="$C_WARN"; icon_c="$C_WARN"
 fi
+
+used_g="$(awk -v u="$used_kb" 'BEGIN { printf "%.1fG", u/1048576 }')"
+emit_block "$(fmt_block "󰍛" "$used_g" "$val_c" "$icon_c")" "$(fmt_block "󰍛" "${pct}%" "$val_c" "$icon_c")"

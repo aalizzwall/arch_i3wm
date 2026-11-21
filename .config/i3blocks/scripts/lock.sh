@@ -12,8 +12,16 @@ if [ "$1" = "--dpms" ]; then
     (sleep 1 && xset dpms force off) &
 fi
 
-# 4. 鎖定螢幕 (-n 留在前景)
-i3lock -n -c 000000
+# 4. 鎖定螢幕；若由 xss-lock --transfer-sleep-lock 呼叫，鎖上後立刻釋放 sleep lock FD 避免合蓋乾等 5 秒
+if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
+    i3lock -n -c 000000 {XSS_SLEEP_LOCK_FD}<&- &
+    LOCK_PID=$!
+    sleep 0.1
+    exec {XSS_SLEEP_LOCK_FD}<&-
+    wait "$LOCK_PID"
+else
+    i3lock -n -c 000000
+fi
 
 # 5. 解鎖後恢復音量
 if [ "$MUTE_STATE" = "no" ]; then

@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
-# 精簡高效能網路狀態監控 (SSID + 訊號 dBm + 自動進位網速；IP/網關/BBR 收進左鍵通知)
+# 精簡高效能網路狀態監控 (Nord + Nerd Font；低流量自動隱藏網速，左鍵看詳細遙測，右鍵複製 IP)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/theme.sh
+source "${SCRIPT_DIR}/lib/theme.sh"
 
 STATE_FILE="/dev/shm/i3blocks_net_state_${UID}"
+RATE_HIDE_THRESHOLD=10240  # 10 KiB/s 以下隱藏網速，保持狀態列精簡
+
 read -r up_sec _ < /proc/uptime
 now_cs="${up_sec/./}"
 now_cs=$(( 10#$now_cs ))
 
-# 讀取舊狀態（格式: iface prev_cs prev_rx prev_tx）
 declare -A prev_cs_map prev_rx_map prev_tx_map
 if [[ -r "$STATE_FILE" ]]; then
     while read -r f_if f_cs f_rx f_tx; do
@@ -19,20 +24,19 @@ fi
 
 fmt_rate() {
     awk -v bps="$1" 'BEGIN {
-        if (bps >= 1048576)     printf "%5.1fM", bps / 1048576;
-        else if (bps >= 1024)   printf "%5.0fK", bps / 1024;
-        else                    printf "%5.0fK", 0;
+        if (bps >= 1048576)   printf "%.1fM", bps / 1048576;
+        else if (bps >= 1024) printf "%.0fK", bps / 1024;
+        else                  printf "0K";
     }'
 }
 
-output=""
+parts=()
 new_state=""
 popup_lines=""
 primary_ip=""
 
 while read -r iface ip_cidr; do
     [[ -n "$iface" && -n "$ip_cidr" ]] || continue
-    # 過濾 loopback 與容器/虛擬橋接網卡
     case "$iface" in
         lo|docker*|podman*|cni-*|veth*|br-*|virbr*) continue ;;
     esac
@@ -56,9 +60,14 @@ while read -r iface ip_cidr; do
         tx_bps=0
     fi
 
-    rx_out="$(fmt_rate "$rx_bps")"
-    tx_out="$(fmt_rate "$tx_bps")"
     new_state+="${iface} ${now_cs} ${rx} ${tx}"$'\n'
+
+    rate_txt=""
+    if (( rx_bps >= RATE_HIDE_THRESHOLD || tx_bps >= RATE_HIDE_THRESHOLD )); then
+        rx_out="$(fmt_rate "$rx_bps")"
+        tx_out="$(fmt_rate "$tx_bps")"
+        rate_txt=" ${rx_out} ${tx_out}"
+    fi
 
     if [[ "$iface" == w* ]]; then
         iw_out="$(iw dev "$iface" link 2>/dev/null || true)"
@@ -68,17 +77,18 @@ while read -r iface ip_cidr; do
         txrate="$(awk '/tx bitrate:/ {print $3 " " $4; exit}' <<< "$iw_out")"
         [[ -z "$ssid" ]] && ssid="Wi-Fi"
 
-        # Escape Pango 特殊字元，避免 SSID 含 & / < 破壞 markup
-        ssid_esc="${ssid//&/&amp;}"
-        ssid_esc="${ssid_esc//</&lt;}"
-        ssid_esc="${ssid_esc//>/&gt;}"
-
-        color="#00FFFF"
+        val_color="$C_FG"
+        icon_color="$C_INFO"
+        sig_txt=""
         if [[ -n "$sig" ]]; then
             if (( sig <= -80 )); then
-                color="#bf616a"
+                val_color="$C_CRIT"
+                icon_color="$C_CRIT"
+                sig_txt=" ${sig}dBm"
             elif (( sig <= -70 )); then
-                color="#ebcb8b"
+                val_color="$C_WARN"
+                icon_color="$C_WARN"
+                sig_txt=" ${sig}dBm"
             fi
         fi
 
@@ -87,14 +97,15 @@ while read -r iface ip_cidr; do
             (( freq >= 4900 )) && band="5GHz" || band="2.4GHz"
         fi
 
-        sig_txt="${sig:+ ${sig}dBm}"
-        output+="<span color='${color}'> ${ssid_esc}${sig_txt} ⬇${rx_out} ⬆${tx_out}</span> "
+        parts+=("$(fmt_block "" "${ssid}${sig_txt}${rate_txt}" "$val_color" "$icon_color")")
         popup_lines+="Wi-Fi (${iface}): ${ssid} ${band:+(${band})}"$'\n'
         popup_lines+="  IP     : ${ip}"$'\n'
         popup_lines+="  Signal : ${sig:-N/A} dBm  |  Link: ${txrate:-N/A}"$'\n'
+        popup_lines+="  Rate   : ↓$(fmt_rate "$rx_bps")/s  ↑$(fmt_rate "$tx_bps")/s"$'\n'
     else
-        output+="<span color='#a3be8c'>󰈀 ${iface} ⬇${rx_out} ⬆${tx_out}</span> "
+        parts+=("$(fmt_block "󰈀" "${iface}${rate_txt}" "$C_FG" "$C_OK")")
         popup_lines+="Wired (${iface}): ${ip}"$'\n'
+        popup_lines+="  Rate   : ↓$(fmt_rate "$rx_bps")/s  ↑$(fmt_rate "$tx_bps")/s"$'\n'
     fi
 done < <(ip -4 -o addr show scope global 2>/dev/null | awk '!seen[$2]++ {print $2, $4}')
 
@@ -103,20 +114,21 @@ printf '%s' "$new_state" > "$STATE_FILE"
 if [[ "${BLOCK_BUTTON:-}" == "1" ]]; then
     gw="$(ip route show default 2>/dev/null | awk '/default/ {print $3 " via " $5; exit}')"
     tcp_cc="$(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null || echo N/A)"
-    notify-send "🌐 網路詳細遙測" "${popup_lines:-目前無連線}Gateway: ${gw:-N/A}
+    notify-send " 網路詳細遙測" "${popup_lines:-目前無連線}Gateway: ${gw:-N/A}
 TCP CC : ${tcp_cc}"
 elif [[ "${BLOCK_BUTTON:-}" == "3" && -n "$primary_ip" ]]; then
     if command -v xclip >/dev/null 2>&1; then
         printf '%s' "$primary_ip" | xclip -selection clipboard
-        notify-send "📋 已複製本機 IP" "$primary_ip"
+        notify-send "󰆏 已複製本機 IP" "$primary_ip"
     elif command -v xsel >/dev/null 2>&1; then
         printf '%s' "$primary_ip" | xsel --clipboard --input
-        notify-send "📋 已複製本機 IP" "$primary_ip"
+        notify-send "󰆏 已複製本機 IP" "$primary_ip"
     fi
 fi
 
-if [[ -z "$output" ]]; then
-    echo "<span color='#bf616a'>󰖪 Offline</span>"
+if (( ${#parts[@]} == 0 )); then
+    emit_block "$(fmt_block "󰖪" "Offline" "$C_CRIT" "$C_CRIT")"
 else
-    printf '%s\n' "${output% }"
+    joined="$(IFS='  '; printf '%s' "${parts[*]}")"
+    emit_block "$joined"
 fi

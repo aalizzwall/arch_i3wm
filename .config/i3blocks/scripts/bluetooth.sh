@@ -1,23 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# 藍牙狀態監控 (Nord + Nerd Font；左鍵呼叫選單，右鍵開關電源)
 
-# 接收 i3blocks 傳來的滑鼠點擊事件
-case "$BLOCK_BUTTON" in
-    1) rofi-bluetooth & ;; # 左鍵：呼叫選單
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/theme.sh
+source "${SCRIPT_DIR}/lib/theme.sh"
+
+case "${BLOCK_BUTTON:-}" in
+    1) rofi-bluetooth & ;;
     3) if rfkill list bluetooth | grep -q 'Soft blocked: yes'; then
            rfkill unblock bluetooth
        else
            rfkill block bluetooth
-       fi ;; # 右鍵：切換電源
+       fi ;;
 esac
 
-# 判斷硬體狀態與連線數並動態變色
 if rfkill list bluetooth | grep -q 'Soft blocked: yes'; then
-    echo "<span color='#5c6370'>󰂲</span>"
+    emit_block "$(fmt_block "󰂲" "" "$C_MUTED" "$C_MUTED")"
 else
-    connected=$(bluetoothctl devices Connected | wc -l)
-    if [ "$connected" -gt 0 ]; then
-        echo "<span color='#98c379'>󰂱 $connected</span>"
+    connected="$(bluetoothctl devices Connected 2>/dev/null | wc -l)"
+    if (( connected > 0 )); then
+        emit_block "$(fmt_block "󰂱" "$connected" "$C_FG" "$C_OK")"
     else
-        echo "<span color='#61afef'>󰂯</span>"
+        emit_block "$(fmt_block "󰂯" "" "$C_ICON" "$C_ICON")"
     fi
 fi

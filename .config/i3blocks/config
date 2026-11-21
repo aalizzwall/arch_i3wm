@@ -1,80 +1,99 @@
-# 全域設定：每 5 秒更新一次，並設定顏色
-separator_block_width=15
-markup=none
+# i3blocks 結構化儀表板設定 (Nord 底線分群 + 純 Nerd Font + 條件展開)
+# 全域預設：Pango 雙色渲染、關閉預設分隔線、底部 2px 群組色條
+markup=pango
+separator=false
+separator_block_width=8
+border_top=0
+border_bottom=2
+border_left=0
+border_right=0
 
+# ==============================================================================
+# 群組 1：連線與服務 (Nord Frost Cyan #88c0d0)
+# ==============================================================================
 [net_all_in_one]
 command=~/.config/i3blocks/scripts/net_all_in_one
 interval=2
-markup=pango
 cursor=pointer
+border=#88c0d0
+
+[crypto_bot-service]
+command=~/.config/i3blocks/scripts/systemd_user_status.sh
+instance=crypto_bot.service
+interval=10
+cursor=pointer
+border=#88c0d0
 
 [bluetooth]
 command=~/.config/i3blocks/scripts/bluetooth.sh
 interval=5
-markup=pango
-
-[crypto_bot-service]
-# 指向你剛剛建立的腳本
-command=~/.config/i3blocks/scripts/systemd_user_status.sh
-# 填入你 podman 服務的確切名稱 (例如 container-my-app.service)
-instance=crypto_bot.service
-# 每 10 秒檢查一次狀態
-interval=10
-# 讓游標移過去時顯示為手指圖示 (代表可點擊)
 cursor=pointer
+border=#88c0d0
+separator_block_width=20
 
-# 1. PSI + Load Average 卡頓雷達（點擊看 PSI 與 Top CPU）
+# ==============================================================================
+# 群組 2：運算與散熱 (Nord Aurora Orange #d08770)
+# ==============================================================================
 [system_load]
 command=~/.config/i3blocks/scripts/psi_load.sh
 interval=2
 cursor=pointer
+border=#d08770
 
-# 2. CPU 使用率 + 即時頻率（零依賴純 /proc/stat，點擊看 Governor/ASPM/Undervolt）
 [cpu_usage]
 command=~/.config/i3blocks/scripts/cpu_freq.sh
 interval=3
 cursor=pointer
+border=#d08770
 
-# 3. 真實 CPU 封裝溫度 + Intel GPU 頻率 + Apple 風扇轉速（跨機自動偵測）
 [temperature]
 command=~/.config/i3blocks/scripts/temp_fan.sh
 interval=3
 cursor=pointer
+border=#d08770
+separator_block_width=20
 
-# 4. 真實可用記憶體 (MemAvailable，點擊看 Dirty/Shmem 與 Top 5 RAM)
+# ==============================================================================
+# 群組 3：記憶體與儲存 (Nord Aurora Purple #b48ead)
+# ==============================================================================
 [memory]
 command=~/.config/i3blocks/scripts/memory_geek.sh
 interval=5
 cursor=pointer
+border=#b48ead
 
-# 5. zram 壓縮 + Brave RAM OverlayFS（條件顯示，平常極精簡）
 [zram_psd]
 command=~/.config/i3blocks/scripts/zram_psd.sh
 interval=10
 cursor=pointer
+border=#b48ead
 
-# 6. 硬體空間 - 隨時監控你的 SSD 還有多少容量
 [disk]
-command=~/.config/i3blocks/contrib/disk/disk
-label=󰋊 
-interval=30
+command=~/.config/i3blocks/scripts/disk_usage.sh
 instance=/
+interval=30
+cursor=pointer
+border=#b48ead
+separator_block_width=20
 
-# 7. 音量顯示
+# ==============================================================================
+# 群組 4：裝置與時間 (Nord Aurora Green #a3be8c)
+# ==============================================================================
 [volume]
-command=wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2*100) "%" ($3=="[MUTED]" ? " 󰝟" : " ")}'
-label=VOL 
+command=~/.config/i3blocks/scripts/volume.sh
 interval=once
 signal=10
-color=#f3f4f5
+cursor=pointer
+border=#a3be8c
 
-# 8. 電池電量 + 即時放電/充電瓦數（點擊顯示預估時間、健康度、循環次數）
 [battery]
 command=~/.config/i3blocks/scripts/battery_watt.sh
 interval=5
 cursor=pointer
+border=#a3be8c
 
-# 9. 時間與日期
 [time]
-command=date '+%Y-%m-%d %H:%M:%S'
-interval=1
+command=~/.config/i3blocks/scripts/clock.sh
+interval=10
+cursor=pointer
+border=#a3be8c
