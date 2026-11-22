@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$1" = "area" ]; then
+  scrot -s /tmp/screenshot.png
+else
+  scrot /tmp/screenshot.png
+fi
+xclip -selection clipboard -t image/png -i /tmp/screenshot.png
