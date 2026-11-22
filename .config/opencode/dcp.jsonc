@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json",
+  "version": "1.0",
+  "enabled": true,
+  "rules": {
+    "preserve_recent_turns": 3,
+    "max_tool_output_lines": 120,
+    "tools": {
+      "bash": {
+        "max_lines": 80,
+        "truncate_strategy": "head_tail", 
+        "replacement": "[... Bash output pruned to preserve tokens ...]"
+      },
+      "read_file": {
+        "max_lines": 250,
+        "replacement": "[... File content truncated: please request specific line ranges ...]"
+      },
+      "grep": {
+        "max_matches": 30,
+        "replacement": "[... Grep truncated: too many matches found ...]"
+      }
+    },
+    "preserve_patterns": [
+      "AGENTS.caveman.md",
+      "package.json",
+      "go.mod",
+      "tsconfig.json"
+    ]
+  }
+}
