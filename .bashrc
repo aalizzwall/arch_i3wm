@@ -133,3 +133,15 @@ bind "set completion-query-items 0"
 
 
 export PATH="/home/pascal/.local/bin:$PATH"
+
+# ==============================================================================
+# 7. 現代 CLI 效率工具 (mise / zoxide / atuin)
+# ==============================================================================
+# mise: 多語言版本管理 (取代 nvm / pyenv)
+command -v mise >/dev/null && eval "$(mise activate bash)"
+
+# zoxide: 智慧 cd (使用 z / zi)
+command -v zoxide >/dev/null && eval "$(zoxide init bash)"
+
+# atuin: SQLite 指令歷史搜尋 (Ctrl+R)
+command -v atuin >/dev/null && eval "$(atuin init bash)"
