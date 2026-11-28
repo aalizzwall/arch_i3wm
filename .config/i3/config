@@ -31,9 +31,10 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/i3blocks/script
 exec --no-startup-id blueman-applet
 exec --no-startup-id feh --bg-scale /usr/local/share/wallpaper/GOD.JPG
 
-# QoL 現代化桌面套件 (通知中心、隨身碟自動掛載、視窗透明與特效)
+# QoL 現代化桌面套件 (通知中心、隨身碟自動掛載、視窗透明與特效、剪貼簿歷史)
 exec --no-startup-id dunst
 exec --no-startup-id picom -b
+exec --no-startup-id greenclip daemon
 
 # 3. 硬體電量守護神 (自製腳本 — 已改由 SMC 硬體 BCLM 80% 保護取代，故停用)
 # exec --no-startup-id ~/.config/i3blocks/scripts/battery_monitor.sh
@@ -86,6 +87,22 @@ bindsym $mod+d exec --no-startup-id rofi -show drun -show-icons -font "JetBrains
 
 # Rofi 計算機 (即打即算，按 Enter 複製結果)
 bindsym $mod+c exec --no-startup-id rofi -show calc -modi calc -no-show-match -no-sort
+
+# Rofi 剪貼簿歷史 (greenclip)
+bindsym $mod+Shift+v exec --no-startup-id rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}'
+
+# 浮動 TUI HUD 視窗規則 (配合 terminator -T "floating-tui:...")
+for_window [class="(?i)terminator" title="^floating-tui:"] floating enable, resize set 1050 680, move position center
+
+# 一鍵浮動 TUI HUD (系統監控 / 檔案總管 / 音量 / 藍牙)
+bindsym $mod+t exec --no-startup-id terminator -T "floating-tui:btop" -x btop
+bindsym $mod+Shift+f exec --no-startup-id terminator -T "floating-tui:yazi" -x yazi
+bindsym $mod+Shift+a exec --no-startup-id terminator -T "floating-tui:wiremix" -x wiremix
+bindsym $mod+u exec --no-startup-id terminator -T "floating-tui:bluetui" -x bluetui
+
+# Dunst 通知控制 (叫回歷史通知 / 清空全部通知)
+bindsym $mod+n exec --no-startup-id dunstctl history-pop
+bindsym $mod+Shift+n exec --no-startup-id dunstctl close-all
 
 # --- 6. 視窗焦點與移動 (Focus & Move) ---
 # 焦點切換 (Vim 鍵位 or 方向鍵)
@@ -158,7 +175,7 @@ mode "$mode_system" {
   bindsym l exec --no-startup-id "~/.config/i3blocks/scripts/lock.sh --dpms", mode "default"
   bindsym e exec --no-startup-id i3-msg exit, mode "default"
   bindsym s exec --no-startup-id systemctl suspend, mode "default"
-  bindsym h exec --no-startup-id systemctl hybrid-sleep, mode "default"
+  bindsym h exec --no-startup-id systemctl hibernate, mode "default"
   bindsym r exec --no-startup-id systemctl reboot, mode "default"
   bindsym Shift+s exec --no-startup-id poweroff -p, mode "default"  
   bindsym Return mode "default"
